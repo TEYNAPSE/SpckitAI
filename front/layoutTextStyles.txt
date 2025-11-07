@@ -1,0 +1,17 @@
+// Spckit AI
+text-white
+text-2xl
+font-extralight
+font-['Noto_Sans']
+---
+// login
+text-black
+text-base
+font-medium
+font-['Poppins']
+---
+// Sign up
+text-black
+text-base
+font-medium
+font-['Poppins']

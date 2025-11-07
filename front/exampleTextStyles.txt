@@ -1,0 +1,281 @@
+// Spckit AI
+text-white
+text-2xl
+font-extralight
+font-['Noto_Sans']
+---
+// login
+text-black
+text-base
+font-medium
+font-['Poppins']
+---
+// Sign up
+text-black
+text-base
+font-medium
+font-['Poppins']
+---
+// 그래픽디자인을 위한 컴퓨터를 맞추고 싶어요 예산은 100만원대로 생각하고 있어요
+text-zinc-100/95
+text-2xl
+font-normal
+font-['Noto_Sans_KR']
+leading-10
+tracking-wide
+---
+// 1. 핵심 고려사항 (디자인 워크플로우):<br/>
+text-zinc-100
+text-2xl
+font-normal
+font-['Noto_Sans_KR']
+leading-10
+tracking-wide
+---
+// 2D 디자인 (포토샵, 일러스트): 위 사양으로 매우 쾌적하게 작업할 수 있습니다. CPU 성능과 RAM 용량이 중요하며, 16GB RAM은 대부분의 작업을 소화합니다.<br/>3D 및 영상 (블렌더, 프리미어 프로): RTX 4060은 엔트리급 3D 작업 및 FHD 영상 편집 가속에 효율적입니다. 하지만 복잡한 3D 렌더링이나 4K 편집 시에는 VRAM(8GB)의 한계와 렌더링 시간 증가를 체감할 수 있습니다.<br/>
+text-zinc-100
+text-2xl
+font-normal
+font-['Noto_Sans_KR']
+leading-10
+tracking-wide
+---
+// 2. 예산 관련 조언:<br/>
+text-zinc-100
+text-2xl
+font-normal
+font-['Noto_Sans_KR']
+leading-10
+tracking-wide
+---
+// 예산 조정 (100만원 이하): GPU를 한 단계 낮추거나 (예: RTX 3050 8GB), SSD 용량을 512GB로 줄여야 합니다. 하지만 그래픽 작업의 핵심인 GPU 성능 저하는 권장하지 않습니다.
+text-zinc-100
+text-2xl
+font-normal
+font-['Noto_Sans_KR']
+leading-10
+tracking-wide
+---
+// 제품명
+text-zinc-100
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// AMD 라이젠7-6세대 9700X
+text-zinc-100
+text-xl
+font-normal
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 가격
+text-white
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 가격
+text-white
+text-xl
+font-normal
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 특징 1
+text-white
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 내용
+text-white
+text-xl
+font-light
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 특징 2
+text-white
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 내용
+text-white
+text-xl
+font-light
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 제품명
+text-zinc-100
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// AMD 라이젠7-5세대 7800X3D
+text-zinc-100
+text-xl
+font-normal
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 가격
+text-white
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 가격
+text-white
+text-xl
+font-normal
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 특징 1
+text-white
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 내용
+text-white
+text-xl
+font-light
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 특징 2
+text-white
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 내용
+text-white
+text-xl
+font-light
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 제품명
+text-zinc-100
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// AMD 라이젠7-5세대 7800X3D
+text-zinc-100
+text-xl
+font-normal
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 가격
+text-white
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 가격
+text-white
+text-xl
+font-normal
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 특징 1
+text-white
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 내용
+text-white
+text-xl
+font-light
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 특징 2
+text-white
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 내용
+text-white
+text-xl
+font-light
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 제품명
+text-zinc-100
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 제품명
+text-zinc-100
+text-xl
+font-normal
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 가격
+text-white
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 가격
+text-white
+text-xl
+font-normal
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 특징 1
+text-white
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 내용
+text-white
+text-xl
+font-light
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 특징 2
+text-white
+text-xl
+font-bold
+font-['Noto_Sans_KR']
+tracking-widest
+---
+// 내용
+text-white
+text-xl
+font-light
+font-['Noto_Sans_KR']
+tracking-widest

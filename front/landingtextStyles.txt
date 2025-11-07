@@ -1,0 +1,37 @@
+// Spckit AI
+text-white
+text-2xl
+font-extralight
+font-['Noto_Sans']
+---
+// login
+text-black
+text-base
+font-medium
+font-['Poppins']
+---
+// Sign up
+text-black
+text-base
+font-medium
+font-['Poppins']
+---
+// Spckit AI
+text-white
+text-4xl
+font-extralight
+font-['Noto_Sans']
+---
+// 최고의 견적을 맞추세요
+text-white
+text-6xl
+font-['Noto_Sans_KR']
+leading-[74px]
+---
+// 주로 컴퓨터로 어떤 일을 하세요?
+text-neutral-600
+text-xl
+font-medium
+font-['Noto_Sans_KR']
+leading-5
+line-clamp-1
