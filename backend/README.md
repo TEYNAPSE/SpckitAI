@@ -1,231 +1,114 @@
-# Backend API
+# Backend - RAG 시스템
 
-백엔드 API 서버 디렉토리입니다.
+> PC 부품 추천을 위한 RAG (Retrieval-Augmented Generation) 백엔드
 
-## 현재 구조
+## 📋 개요
+
+이 디렉토리는 Spckit AI의 백엔드 RAG 시스템을 포함합니다.
+
+## 🏗️ 구조
 
 ```
 backend/
-├── rag/                  # RAG 시스템 구현
-│   ├── __init__.py
-│   ├── config.py         # 설정 파일
-│   ├── embedder.py       # Gemini 임베딩 생성기
-│   ├── vector_store.py   # ChromaDB 벡터 데이터베이스
-│   ├── retriever.py      # 부품 검색기
-│   ├── generator.py      # 추천 응답 생성기
-│   ├── data_parser.py    # SQL 데이터 파서
-│   └── pipeline.py       # RAG 파이프라인 통합
+├── api/                  # FastAPI REST API
+│   ├── main.py          # API 엔드포인트
+│   └── __init__.py
 │
-├── api/                  # FastAPI 서버
-│   ├── __init__.py
-│   └── main.py           # API 엔드포인트
+├── rag/                 # RAG 핵심 모듈
+│   ├── config.py        # 설정 관리
+│   ├── embedder.py      # 임베딩 생성
+│   ├── vector_store.py  # ChromaDB 관리
+│   ├── retriever.py     # 문서 검색
+│   ├── generator.py     # AI 응답 생성
+│   ├── data_parser.py   # SQL 파싱
+│   └── pipeline.py      # RAG 파이프라인
 │
-├── scripts/              # 유틸리티 스크립트
-│   ├── __init__.py
-│   ├── init_database.py  # DB 초기화 스크립트
-│   └── test_rag.py       # RAG 시스템 테스트
+├── scripts/             # 유틸리티 스크립트
+│   ├── init_database.py # DB 초기화
+│   └── test_rag.py      # RAG 테스트
 │
-├── data/                 # 데이터베이스 파일 (RAG 구현 준비)
-│   ├── pc_data_dump.sql         # PC 부품 데이터 덤프 (11MB)
-│   ├── PC 부품 DB 스키마 가이드.pdf
-│   └── README.md
+├── data/                # 데이터 파일
+│   └── pc_data_dump.sql # PC 부품 DB
 │
-├── prompts/              # 프롬프트 관리
-│   ├── system-instruction.js
-│   ├── user-prompt-template.js
-│   ├── index.js
-│   └── README.md
-│
-├── chroma_db/            # ChromaDB 저장 디렉토리 (자동 생성)
-├── pyproject.toml        # uv 패키지 관리
-├── .env.example          # 환경 변수 예시
-└── README.md             # 이 파일
+├── chroma_db/           # ChromaDB 저장소 (생성됨)
+├── prompts/             # 프롬프트 템플릿
+├── pyproject.toml       # Python 프로젝트 설정
+└── .env                 # 환경 변수 (생성 필요)
 ```
 
-## RAG 시스템 구현
+## 🚀 빠른 시작
 
-### 1. 설치 및 환경 설정
+상세한 가이드는 **[docs/QUICK_START.md](../docs/QUICK_START.md)**를 참조하세요.
 
 ```bash
-# uv 설치 (https://github.com/astral-sh/uv)
-pip install uv
+# 1. 가상 환경 생성
+uv venv
 
-# 프로젝트 의존성 설치
-cd backend
+# 2. 활성화 (Windows)
+.venv\Scripts\activate
+
+# 3. 의존성 설치
 uv pip install -e .
 
-# 개발 의존성 포함
-uv pip install -e ".[dev]"
-```
+# 4. 환경 변수 설정
+# .env 파일 생성 후 GEMINI_API_KEY 추가
 
-### 2. 환경 변수 설정
-
-`.env` 파일을 생성하고 API 키를 설정하세요:
-
-```bash
-cp .env.example .env
-# .env 파일을 편집하여 GEMINI_API_KEY를 설정
-```
-
-### 3. 벡터 데이터베이스 초기화
-
-SQL 덤프 파일을 파싱하고 ChromaDB에 임베딩하여 저장:
-
-```bash
-# 프로젝트 루트로 이동 (중요!)
+# 5. 데이터베이스 초기화 (프로젝트 루트에서)
 cd ..
+backend\run_init.bat
 
-# 처음 초기화 (10-30분 소요)
-python backend/scripts/init_database.py
-
-# 기존 데이터를 삭제하고 재구축
-python backend/scripts/init_database.py --force
-
-# 로그 레벨 설정
-python backend/scripts/init_database.py --log-level DEBUG
+# 6. 테스트
+backend\run_test.bat
 ```
 
-**주의**: 스크립트는 프로젝트 루트에서 실행해야 합니다.
+## 📚 상세 문서
 
-### 4. RAG 시스템 테스트
+- **[RAG 시스템 가이드](../docs/RAG_GUIDE.md)** - 완전한 RAG 시스템 설명
+- **[빠른 시작](../docs/QUICK_START.md)** - 단계별 설정 가이드
+- **[문제 해결](../docs/TROUBLESHOOTING.md)** - 일반적인 오류 해결
+- **[배포 가이드](../docs/DEPLOYMENT_GUIDE.md)** - 프로덕션 배포
+
+## 🔧 개발
+
+### 의존성 추가
 
 ```bash
-python backend/scripts/test_rag.py
+# pyproject.toml에 추가 후
+uv pip install -e .
 ```
 
-### 5. API 서버 실행
+### 테스트
 
 ```bash
-# 개발 서버 실행
-cd backend/api
-uvicorn main:app --reload --port 8000
-
-# 또는 직접 실행
-python backend/api/main.py
+pytest tests/
 ```
 
-API 문서는 브라우저에서 확인:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+### API 서버 실행 (개발 예정)
 
-## API 엔드포인트
-
-### GET /
-헬스 체크
-
-### GET /health
-시스템 상태 확인
-
-### POST /query
-PC 부품 추천 쿼리
-
-**요청 예시:**
-```json
-{
-  "query": "게임용 고성능 그래픽카드 추천해줘",
-  "top_k": 5,
-  "category": "gpu",
-  "include_context": false
-}
-```
-
-### POST /query-by-specs
-사양 기반 부품 추천
-
-**요청 예시:**
-```json
-{
-  "budget": 150,
-  "purpose": "게임",
-  "categories": ["cpu", "gpu", "memory"],
-  "top_k": 3
-}
-```
-
-### POST /compare
-부품 비교
-
-**요청 예시:**
-```json
-{
-  "component_ids": ["gpu_1", "gpu_2", "gpu_3"]
-}
-```
-
-### GET /stats
-시스템 통계 조회
-
-## RAG 시스템 구성
-
-### 1. Embedder (embedder.py)
-- Gemini API를 사용한 텍스트 임베딩 생성
-- 배치 처리 및 재시도 로직 포함
-- 모델: `text-embedding-004` (768 차원)
-
-### 2. Vector Store (vector_store.py)
-- ChromaDB를 사용한 벡터 데이터베이스
-- 코사인 유사도 기반 검색
-- 영구 저장 지원
-
-### 3. Data Parser (data_parser.py)
-- SQL 덤프 파일 파싱
-- 부품 정보 추출 및 문서화
-- 메타데이터 구조화
-
-### 4. Retriever (retriever.py)
-- 의미 기반 부품 검색
-- 카테고리 필터링
-- 사양 기반 검색
-
-### 5. Generator (generator.py)
-- Gemini API를 사용한 추천 생성
-- JSON 형식 응답
-- 부품 비교 분석
-
-### 6. Pipeline (pipeline.py)
-- 전체 RAG 시스템 통합
-- 워크플로우 자동화
-- 엔드-투-엔드 처리
-
-## 향후 계획
-
-- [x] RAG 검색 API (SQL 데이터베이스 기반)
-  - `data/pc_data_dump.sql`을 데이터베이스에 임포트 ✅
-  - 벡터 데이터베이스 구축 (Gemini Embeddings + ChromaDB) ✅
-  - 부품 정보 임베딩 및 검색 API 개발 ✅
-- [ ] 3D 에셋 메타데이터 API
-- [ ] 부품 호환성 검사 API
-- [ ] Gemini API 프록시 (보안 강화)
-- [ ] 프롬프트 버전 관리 시스템
-- [ ] 프롬프트 A/B 테스트
-
-## 기술 스택
-
-- **Python 3.10+**
-- **Gemini API**: 임베딩 및 생성 모델
-- **ChromaDB**: 벡터 데이터베이스
-- **FastAPI**: API 서버
-- **uv**: 패키지 관리
-- **Loguru**: 로깅
-
-## 문제 해결
-
-### ChromaDB 초기화 오류
 ```bash
-# ChromaDB 디렉토리 삭제 후 재시도
-rm -rf backend/chroma_db
-python backend/scripts/init_database.py
+uvicorn api.main:app --reload --port 8080
 ```
 
-### Gemini API 키 오류
-`.env` 파일에 올바른 API 키가 설정되어 있는지 확인하세요.
+## 🌐 API 엔드포인트 (개발 중)
 
-### 임포트 에러
-프로젝트 루트에서 실행하고 있는지 확인하세요:
-```bash
-# 프로젝트 루트로 이동
-cd /path/to/SpckitAI
+- `GET /health` - 헬스 체크
+- `POST /api/recommend` - PC 부품 추천
+- `POST /api/query` - RAG 쿼리
 
-# 스크립트 실행
-python backend/scripts/init_database.py
+## 🔐 환경 변수
+
+`.env` 파일 생성:
+
+```env
+GEMINI_API_KEY=your_api_key_here
 ```
+
+## 📊 데이터
+
+- **135,660개** PC 부품 레코드
+- **10개** 부품 카테고리
+- **3,000개** 벡터 문서
+
+---
+
+**더 자세한 정보는 [docs/](../docs/) 폴더를 참조하세요.**

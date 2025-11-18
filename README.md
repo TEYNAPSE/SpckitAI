@@ -476,12 +476,13 @@ cat backend/.env
 
 ## 📚 관련 문서
 
-- [프로젝트 구조 상세](PROJECT_STRUCTURE.md)
-- [변경 이력](CHANGELOG.md)
-- [배포 가이드](DEPLOYMENT.md)
-- [RAG 시스템 가이드](backend/RAG_GUIDE.md)
-- [빠른 시작](backend/QUICK_START.md)
-- [문제 해결](backend/TROUBLESHOOTING.md)
+- [프로젝트 구조 상세](docs/PROJECT_STRUCTURE.md)
+- [변경 이력](docs/CHANGELOG.md)
+- [배포 가이드](docs/DEPLOYMENT_GUIDE.md)
+- [RAG 시스템 가이드](docs/RAG_GUIDE.md)
+- [빠른 시작](docs/QUICK_START.md)
+- [문제 해결](docs/TROUBLESHOOTING.md)
+- [프로젝트 요약](docs/SUMMARY.md)
 
 ---
 
