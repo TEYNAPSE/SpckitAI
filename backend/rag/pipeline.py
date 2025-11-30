@@ -130,16 +130,8 @@ class RAGPipeline:
         )
 
         if not retrieved_components:
-            logger.warning("검색된 부품이 없습니다.")
-            return {
-                "query": user_query,
-                "recommendation": {
-                    "analysis": "죄송합니다. 요청하신 조건에 맞는 부품을 찾을 수 없습니다.",
-                    "components": [],
-                    "total_price": 0,
-                },
-                "retrieved_count": 0,
-            }
+            logger.warning("검색된 부품이 없습니다. AI 생성 단계로 진행합니다.")
+            # early return 제거 -> generator가 처리하도록 함
 
         # 2. 추천 생성
         recommendation = self.generator.generate_recommendation(
