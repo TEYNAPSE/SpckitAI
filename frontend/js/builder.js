@@ -21,6 +21,7 @@ const terminalLoadingText = document.getElementById('terminal-loading-text');
 let selectedParts = [];
 let isLoading = false;
 let chatHistory = [];
+const CATEGORY_ORDER = ['CPU', 'Mainboard', 'RAM', 'GPU', 'SSD', 'Power', 'Case', 'Cooler'];
 
 // 빌드 상태 관리
 let currentPhase = 'requirements'; // 'requirements' | 'building'
@@ -28,17 +29,36 @@ let buildStageIndex = 0;
 const BUILD_STAGES = ['CPU', 'Mainboard', 'RAM', 'GPU', 'SSD', 'Power', 'Case', 'Cooler'];
 
 /**
+ * 로컬 스토리지 키
+ */
+const STORAGE_KEY = 'spckit_builder_state';
+
+/**
  * 초기화
  */
 function init() {
-  // URL 파라미터에서 초기 메시지 가져오기
+  // 1. 상태 복원
+  loadState();
+
+  // 2. URL 파라미터 처리
   const urlParams = new URLSearchParams(window.location.search);
   const initialMessage = urlParams.get('message');
 
   if (initialMessage) {
-    handleSendMessage(initialMessage);
+    // 히스토리가 비어있거나, 마지막 메시지와 다른 경우에만 처리 (새로고침 중복 방지)
+    const lastMsg = chatHistory.length > 0 ? chatHistory[chatHistory.length - 1] : null;
+    if (!lastMsg || (lastMsg.role === 'user' && lastMsg.text !== initialMessage) || (lastMsg.role === 'model')) {
+        // 약간의 딜레이를 주어 로드 완료 후 실행
+        setTimeout(() => handleSendMessage(initialMessage), 100);
+    }
+  } else if (chatHistory.length === 0) {
+      // 히스토리가 없고 초기 메시지도 없으면 환영 메시지
+      // addMessage('안녕하세요! 어떤 PC를 맞추고 싶으신가요?', 'ai');
   }
 
+  // UI 복원 (선택된 부품 등)
+  updateSelectedParts();
+  
   // 이벤트 리스너 등록
   sendBtn.addEventListener('click', handleSendClick);
   chatInput.addEventListener('keydown', handleKeyDown);
@@ -55,6 +75,108 @@ function init() {
   if (nextStepBtn) {
     nextStepBtn.addEventListener('click', handleNextStep);
   }
+}
+
+/**
+ * 시스템 사양 가져오기 (브라우저 정보 기반)
+ */
+function getSystemSpecs() {
+    const specs = [];
+    
+    // 1. User Agent (OS, Browser)
+    if (navigator.userAgent) {
+        specs.push(`OS/Browser: ${navigator.userAgent}`);
+    }
+    
+    // 2. CPU Cores (Logical Processors)
+    if (navigator.hardwareConcurrency) {
+        specs.push(`CPU Cores: ${navigator.hardwareConcurrency}`);
+    }
+    
+    // 3. RAM (Device Memory in GB - 대략적인 값)
+    if (navigator.deviceMemory) {
+        specs.push(`RAM: ~${navigator.deviceMemory}GB`);
+    }
+    
+    // 4. GPU (WebGL Renderer)
+    try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl) {
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            if (debugInfo) {
+                const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                specs.push(`GPU Renderer: ${renderer}`);
+            }
+        }
+    } catch (e) {
+        console.warn("GPU info not available", e);
+    }
+
+    return specs.join('\n');
+}
+
+/**
+ * 상태 저장
+ */
+function saveState() {
+    const state = {
+        chatHistory,
+        selectedParts,
+        currentPhase,
+        buildStageIndex
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+/**
+ * 상태 불러오기
+ */
+function loadState() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        try {
+            const state = JSON.parse(saved);
+            chatHistory = state.chatHistory || [];
+            selectedParts = state.selectedParts || [];
+            currentPhase = state.currentPhase || 'requirements';
+            buildStageIndex = state.buildStageIndex || 0;
+
+            // 채팅 UI 복원
+            chatMessages.innerHTML = ''; // 초기화
+            chatHistory.forEach(msg => {
+                // AI 메시지 복원 시 타이핑 효과 없이 즉시 추가
+                if (msg.role === 'user') {
+                    addMessage(msg.text, 'user');
+                } else {
+                    // AI 메시지는 단순 텍스트로 복원
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ai-message`;
+                    
+                    const header = document.createElement('div');
+                    header.className = 'message-header';
+                    header.innerHTML = `
+                      <svg class="icon-bolt-small" width="40" height="14" viewBox="0 0 40 14" fill="currentColor">
+                        <text x="0" y="12" font-size="14" font-family="Inter" font-weight="700">Spckit AI</text>
+                      </svg>
+                    `;
+                    messageDiv.appendChild(header);
+
+                    const bubble = document.createElement('div');
+                    bubble.className = 'message-bubble';
+                    bubble.textContent = msg.text;
+                    messageDiv.appendChild(bubble);
+                    
+                    chatMessages.appendChild(messageDiv);
+                }
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        } catch (e) {
+            console.error("Failed to load state:", e);
+            localStorage.removeItem(STORAGE_KEY);
+        }
+    }
 }
 
 /**
@@ -87,31 +209,48 @@ async function handleSendMessage(message) {
   isLoading = true;
   updateSendButtonState();
 
-  // 사용자 메시지 추가
+  // 사용자 메시지 UI 추가
   addMessage(message, 'user');
   chatHistory.push({ role: 'user', text: message });
+  saveState(); // 상태 저장
 
-  // 요구사항 분석 단계일 때만 일반 채팅 응답
+  // 실제 백엔드로 보낼 쿼리 구성
+  let queryToSend = message;
+  
+  // @내사양 태그 감지 및 처리
+  if (message.includes('@내사양')) {
+      const specs = getSystemSpecs();
+      queryToSend = `${message}\n\n[System Info]\n${specs}`;
+  }
+
+  // 요구사항 분석 단계일 때도 바로 첫 번째 단계(CPU) 추천으로 진입
   if (currentPhase === 'requirements') {
+      currentPhase = 'building';
+      buildStageIndex = 0;
+      saveState();
+
       const loadingMessage = addMessage('', 'ai', true);
       
       try {
-        // 일반적인 요구사항 수집 대화 (카테고리 없이 호출)
-        // 주의: 현재 API 구조상 항상 추천 결과를 반환하려고 시도함.
-        // 챗봇 모드와 추천 모드를 구분하는 것이 좋으나, 
-        // 여기서는 'category' 파라미터 없이 호출하여 자연스러운 대화를 유도하거나
-        // 백엔드 프롬프트를 조정하여 "아직 부품 추천 전이면 질문만 하세요"라고 해야 함.
-        // 우선 기존 getPCRecommendation 사용하되, UI에는 텍스트만 표시.
-        
-        const response = await getPCRecommendation(message);
+        // 바로 CPU(첫 번째 단계) 추천 요청
+        const currentStage = BUILD_STAGES[buildStageIndex];
+        // 쿼리는 그대로 보내되, 카테고리를 명시하여 해당 부품만 검색
+        const response = await getPCRecommendation(queryToSend, { category: currentStage });
         
         stopDynamicLoadingText();
         loadingMessage.remove();
 
         await addMessageWithTyping(response.analysis, 'ai');
         chatHistory.push({ role: 'model', text: response.analysis });
+        saveState(); // 응답 저장
         
-        // 1단계에서는 부품 추천 리스트를 보여주지 않음 (Chat Only)
+        // 1단계 부품 리스트 표시
+        if (response.components && response.components.length > 0) {
+            displayRecommendations(response.components);
+        } else {
+            // 검색 결과가 없는 경우 처리
+            terminalContent.innerHTML = `<div class="terminal-line">추천된 ${currentStage}가 없습니다.</div>`;
+        }
 
       } catch (error) {
         console.error('메시지 전송 오류:', error);
@@ -123,21 +262,22 @@ async function handleSendMessage(message) {
         updateSendButtonState();
       }
   } else {
-      // 빌드 단계에서의 채팅 (추가 질문 등)
-      // 여기서는 현재 단계의 부품에 대한 질문일 수 있음
+      // 이미 빌드 진행 중인 경우 (추가 질문이나 다음 단계)
+      // 현재 단계의 부품에 대한 질문으로 간주
       const loadingMessage = addMessage('', 'ai', true);
       try {
           // 현재 단계의 컨텍스트를 포함하여 질의
           const currentStage = BUILD_STAGES[buildStageIndex];
-          const response = await getPCRecommendation(message, { category: currentStage });
+          const response = await getPCRecommendation(queryToSend, { category: currentStage });
           
           stopDynamicLoadingText();
           loadingMessage.remove();
           
           await addMessageWithTyping(response.analysis, 'ai');
           chatHistory.push({ role: 'model', text: response.analysis });
+          saveState(); // 응답 저장
           
-          // 부품 리스트 업데이트 (사용자가 원해서 검색했을 수도 있으므로)
+          // 부품 리스트 업데이트
           if (response.components && response.components.length > 0) {
               displayRecommendations(response.components);
           }
@@ -162,6 +302,7 @@ async function startBuildProcess() {
 
     currentPhase = 'building';
     buildStageIndex = 0; // CPU부터 시작
+    saveState();
     
     // UI 업데이트
     addMessageWithTyping("네, 알겠습니다. 이제 본격적으로 부품을 하나씩 맞춰볼까요? 먼저 **CPU**부터 살펴보겠습니다.", 'ai');
@@ -181,12 +322,12 @@ async function loadStageComponents(stage) {
     terminalContent.innerHTML = ''; // 기존 리스트 초기화
 
     try {
-        // 사용자 요구사항(채팅 히스토리)을 기반으로 해당 카테고리 추천 요청
-        // 최근 채팅 내용을 합쳐서 쿼리로 보낼 수도 있고, 
-        // 백엔드가 히스토리를 관리하지 않는다면 마지막 사용자 메시지나 요약된 요구사항을 보내야 함.
-        // 여기서는 간단히 "Recommend ${stage} for my build" 형태로 쿼리 전송
-        // 실제로는 chatHistory를 분석하거나 마지막 유저 입력을 활용해야 더 정확함.
-        // 편의상 가장 최근 유저 메시지 + 카테고리 조합 사용
+        // 이전 대화 맥락에서 쿼리 추출 (가장 최근 사용자 메시지 사용)
+        // 전체 요구사항을 다 포함하는게 좋겠지만, 간단하게 최근 메시지로 처리
+        // 더 좋은 방법: chatHistory 전체를 요약하거나 system prompt에 포함
+        
+        // 여기서는 "단계별"이므로 이전 단계에서 선택한 부품 정보도 포함하면 좋음 (호환성 위해)
+        // 하지만 백엔드가 아직 호환성 체크 로직이 완벽하지 않으므로 단순 쿼리
         
         const lastUserMsg = chatHistory.filter(m => m.role === 'user').pop()?.text || "가성비 좋은 PC";
         const query = `${lastUserMsg}`; 
@@ -212,19 +353,18 @@ async function loadStageComponents(stage) {
  * 다음 단계로 이동 (Next Step 버튼)
  */
 async function handleNextStep() {
-    // 현재 단계에서 선택된 부품이 있는지 확인 (선택사항: 강제할지 말지)
+    // 현재 단계에서 선택된 부품이 있는지 확인
     const currentStage = BUILD_STAGES[buildStageIndex];
     const isSelected = selectedParts.some(p => p.category.toLowerCase().includes(currentStage.toLowerCase()));
 
     if (!isSelected) {
-        // 선택 안 했으면 경고? 혹은 그냥 넘어가기?
-        // 여기서는 안내 메시지 출력 후 넘어감
         await addMessageWithTyping(`${currentStage}를 선택하지 않으셨네요. 다음 단계로 넘어갑니다.`, 'ai');
     } else {
         await addMessageWithTyping(`${currentStage} 선택 완료! 다음 부품을 보시죠.`, 'ai');
     }
 
     buildStageIndex++;
+    saveState();
 
     if (buildStageIndex >= BUILD_STAGES.length) {
         await addMessageWithTyping("모든 부품 선택이 완료되었습니다! 견적을 확인해보세요.", 'ai');
@@ -291,10 +431,9 @@ let loadingInterval;
 function startDynamicLoadingText(element) {
   const steps = [
     "요구사항 분석 중...",
-    "부품 데이터베이스 검색 중...",
-    "호환성 체크 에이전트 실행 중...",
-    "가격 효율성 분석 중...",
-    "최적의 견적 생성 중..."
+    "부품 검색 중...",
+    "최적의 부품 선별 중...",
+    "답변 생성 중..."
   ];
   let index = 0;
 
@@ -316,7 +455,7 @@ function startDynamicLoadingText(element) {
       element.style.transform = 'translateY(0)';
     }, 300);
 
-  }, 2500); // 2.5초 간격
+  }, 1500); // 1.5초 간격 (더 빠르게)
 }
 
 function stopDynamicLoadingText() {
@@ -352,7 +491,8 @@ async function addMessageWithTyping(text, type = 'ai') {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 
   let charIndex = 0;
-  const typingSpeed = 15; // ms per character
+  // 타이핑 속도 개선 (기존 15ms -> 8ms)
+  const typingSpeed = 8; 
 
   return new Promise((resolve) => {
     const intervalId = setInterval(() => {
@@ -400,8 +540,8 @@ function displayRecommendations(components) {
 
   components.forEach((component, index) => {
     const card = createRecommendationCard(component);
-    // 순차적 등장 애니메이션 딜레이
-    card.style.animationDelay = `${index * 0.1}s`;
+    // 순차적 등장 애니메이션 딜레이 (속도 개선)
+    card.style.animationDelay = `${index * 0.05}s`;
     card.classList.add('animate-in');
     
     // 이미 선택된 부품인지 확인하여 스타일 적용
@@ -526,17 +666,14 @@ function selectPart(component) {
   const existingIndex = selectedParts.findIndex(p => p.category === component.category);
 
   if (existingIndex !== -1) {
-      // 기존 부품이 있으면, 그 부품을 추천 리스트(Panel 2)에 다시 복구해야 하는지?
-      // 현재 로직상 Panel 2는 API 결과를 그대로 보여주므로, 
-      // 복잡성을 줄이기 위해 단순히 교체만 진행.
-      // UX적으로 교체된 이전 부품이 다시 나타나는건 구현이 까다로움(DOM이 사라졌으므로).
-      // 일단 교체.
+      // 기존 부품 교체
     selectedParts[existingIndex] = component;
   } else {
     selectedParts.push(component);
   }
 
   updateSelectedParts();
+  saveState();
 }
 
 /**
@@ -687,6 +824,7 @@ function restoreRecommendationCard(component) {
 function removePart(index) {
   selectedParts.splice(index, 1);
   updateSelectedParts();
+  saveState();
 }
 
 /**

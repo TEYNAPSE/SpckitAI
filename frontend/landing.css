@@ -560,20 +560,44 @@ body {
 }
 
 .chat-input {
-
     flex: 1;
     background: transparent;
     border: none;
     color: var(--color-white);
     font-size: var(--font-size-14);
     font-family: var(--font-family);
-    resize: none;
     outline: none;
-    max-height: 16px;
+    /* max-height 제거 및 div용 스타일 추가 */
+    min-height: 20px;
+    max-height: 100px;
+    overflow-y: auto;
+    white-space: pre-wrap; /* 줄바꿈 지원 */
 }
 
-.chat-input::placeholder {
+/* Placeholder hack for contenteditable */
+.chat-input:empty:before {
+    content: attr(placeholder);
     color: var(--color-jumbo);
+    display: block; /* Firefox support */
+    pointer-events: none;
+}
+
+/* 내 사양 태그 스타일 */
+.tag-spec {
+    display: inline-flex;
+    align-items: center;
+    color: #00f3ff; /* 네온 블루 */
+    text-shadow: 0 0 8px rgba(0, 243, 255, 0.6);
+    background: rgba(0, 243, 255, 0.1);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 8px;
+    font-weight: bold;
+    font-size: 13px;
+    line-height: 1.4;
+    user-select: none;
+    white-space: nowrap;
 }
 
 .chat-send {

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spckit AI: PC Builder</title>
+    <link rel="icon" type="image/svg+xml" href="./images/spckit-logo.svg">
     <link rel="stylesheet" href="landing.css">
     <script src="./js/landing.js" defer></script>
 </head>
@@ -93,7 +94,7 @@
             <div class="chat-container">
                 <div class="chat-box">
                     <div class="chat-input-wrapper">
-                        <input type="text" class="chat-input" id="landing-chat-input" placeholder="PC 부품 추천을 받으려면 메시지를 입력하세요...">
+                        <div class="chat-input" id="landing-chat-input" contenteditable="true" placeholder="PC 부품 추천을 받으려면 메시지를 입력하세요..."></div>
                         <button class="chat-send" id="landing-send-btn">추천 받기</button>
                     </div>
                     <div class="chat-footer">
@@ -105,13 +106,14 @@
             <!-- 임포트 섹션 -->
             <section class="import-section">
                 <div class="import-options">
-                    <span class="import-label">or import from</span>
+                    <span class="import-label">or start with</span>
                     <div class="import-buttons">
-                        <button class="import-btn">
+                        <button class="import-btn" id="my-specs-btn">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                                <rect x="2" y="2" width="5" height="5" fill="white"/>
+                                <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H4z"/>
+                                <path d="M6 5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5zm1 0h2v2H7V5z"/>
                             </svg>
-                            Figma
+                            내 사양
                         </button>
                         <button class="import-btn">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
